@@ -1,0 +1,591 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transfer Formu</title>
+  <!-- Montserrat fontu (opsiyonel) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap" 
+    rel="stylesheet"
+  >
+  <style>
+    /* 
+    =========================================================
+    1) BODY / ARKA PLAN
+    =========================================================
+    */
+    body {
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+
+      /* Arka plan resmi (sabitleme) */
+      background-image: url('https://www.igapass.com/_ui/responsive/common/images/template/bg-0001.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+
+      color: #FFFFFF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;    
+      margin: 0 auto;
+
+      /* Yarı saydam arka plan */
+      background: rgba(155, 123, 91, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      color: #ffffff;
+    }
+    h2 {
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-top: 8px;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
+    input, select, button, div#priceDisplay {
+      display: block;
+      margin-bottom: 12px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px; 
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    input, select {
+      border: 1px solid #FFFFFF;
+      border-radius: 4px;
+      background-color: #FFFFFF;
+      color: #000000;
+      box-shadow: 0 0px 3px rgba(5, 5, 5, 0.2);
+    }
+
+    button {
+      background-color: #ffffff;
+      color: #5c4632;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(5, 5, 5, 0.3);
+      transition: background-color 0.3s;
+      width: auto;
+      min-width: 160px;
+      margin-top: 8px;
+    }
+    button:hover:enabled {
+      background-color: #a88c77;
+      color: #fff;
+    }
+    button:disabled {
+      background-color: #4a4a4a;
+      color: #999999;
+      cursor: not-allowed;
+    }
+
+    /* Yolcu Ad/Soyad alanları */
+    .passenger-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .passenger-group input {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    /* Yakaları ayırmak için */
+    .yaka-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0 20px 0;
+      flex-wrap: wrap;
+    }
+    .yaka-button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background-color: #f2f2f2;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      user-select: none;
+      color: #000000; 
+    }
+    .yaka-button:hover {
+      background-color: #ddd;
+    }
+    .yaka-button.selected {
+      background-color: green;
+      color: white;
+      border-color: green;
+    }
+
+    /* Özet Tablosu */
+    #summarySection {
+      margin-top: 30px;
+    }
+    #summaryTable {
+      margin-top: 20px;
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px; 
+      margin: 0 auto; 
+    }
+    #summaryTable th, #summaryTable td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    /* Print/PDF'de sadece özet tablo */
+    @media print {
+      #transferForm,
+      #pdfButton {
+        display: none !important;
+      }
+      #summarySection {
+        display: block !important;
+      }
+    }
+
+    /* Öneri metni (bold) */
+    .vehicle-suggestion {
+      font-weight: bold;
+      margin-bottom: 12px;
+      margin-top: 0px;
+      color: #FFEFD5;
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background-color: #eee;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Transfer Formu</h1>
+
+    <!-- FORM -->
+    <div id="transferForm">
+      <!-- Tarih ve Saat (datetime-local) -->
+      <label for="pickupDateTime">Alınma Tarihi ve Saati</label>
+      <input 
+        type="datetime-local" 
+        id="pickupDateTime" 
+        style="color:#000000; background-color:#FFFFFF;" 
+      />
+
+      <!-- Yolcu Sayısı (Sınırsız) -->
+      <label for="passengerCount">Yolcu Sayısı</label>
+      <input 
+        type="number" 
+        id="passengerCount" 
+        value="1" 
+        min="1" 
+        placeholder="1" 
+      />
+
+      <!-- Bagaj Sayısı -->
+      <label for="luggageCount">Bagaj Sayısı</label>
+      <input 
+        type="number" 
+        id="luggageCount" 
+        value="0" 
+        min="0" 
+        placeholder="0"
+      />
+
+      <!-- Yolcu ad/soyad alanları eklenecek yer -->
+      <div id="passengerContainer"></div>
+
+      <!-- Yaka Seçimi -->
+      <label>Yakayı Seçiniz</label>
+      <div class="yaka-buttons">
+        <div id="btnAvrupa"  class="yaka-button">Avrupa Yakası</div>
+        <div id="btnAnadolu" class="yaka-button">Anadolu Yakası</div>
+      </div>
+
+      <!-- Çizgiyle ayırma -->
+      <hr />
+
+      <!-- Genel Havacılık Transferi -->
+      <label>Genel Havacılık Transferi</label>
+      <div class="yaka-buttons">
+        <div id="btnGenel"   class="yaka-button">Genel Havacılık Terminali</div>
+      </div>
+
+      <!-- Adres -->
+      <label for="address" id="addressLabel">Adres</label>
+      <input type="text" id="address" />
+
+      <!-- Uçuş Kodu -->
+      <label for="flightCode">Uçuş Kodu</label>
+      <input 
+        type="text" 
+        id="flightCode" 
+        onblur="formatFlightCode(this)" 
+        placeholder="Örn: TK1234" 
+      />
+
+      <!-- Kontak Numarası -->
+      <label for="contactNumber">Kontak Numarası</label>
+      <input type="tel" id="contactNumber" placeholder="05xx xxx xx xx" />
+
+      <!-- Araç Önerisi (Bold) -->
+      <p id="vehicleSuggestion" class="vehicle-suggestion"></p>
+
+      <!-- Araç Tipi -->
+      <label for="vehicleType">Araç Tipi</label>
+      <select id="vehicleType">
+        <option value="vito">Merc./VW - Vito/Transporter (Max 6 kişi, 5 bagaj)</option>
+        <option value="sclass">Mercedes - S CLASS (Max 2 kişi, 2 bagaj)</option>
+      </select>
+
+      <!-- Araç Adedi -->
+      <label for="vehicleCount">Araç Adedi</label>
+      <input type="number" id="vehicleCount" value="1" min="1" />
+
+      <!-- Fiyat göstergesi -->
+      <label>Toplam Fiyat (EUR)</label>
+      <div id="priceDisplay" style="font-weight: bold; margin-bottom: 20px;">0</div>
+
+      <!-- Bilgileri Güncelle & Fiyat Hesapla -->
+      <button type="button" onclick="updateSummary()">Bilgileri Güncelle &amp; Fiyat Hesapla</button>
+    </div>
+    <!-- /#transferForm -->
+
+    <!-- ÖZET TABLOSU (PDF çıktısında görünecek) -->
+    <div id="summarySection">
+      <h2>Giriş Yapılan Bilgiler</h2>
+      <table id="summaryTable">
+        <thead>
+          <tr>
+            <th>Alan</th>
+            <th>Değer</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody">
+          <!-- JavaScript ile doldurulacak -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PDF Kaydet Butonu -->
+    <div style="text-align: center;">
+      <button type="button" id="pdfButton" onclick="savePDF()">PDF Olarak Kaydet</button>
+    </div>
+  </div><!-- /.container -->
+
+  <script>
+    /*
+      (1) Uçuş Kodu Formatlama:
+      Kullanıcı alanı terk ettiğinde (blur) tetiklenir.
+      - İlk 2 karakter harf, sonraki kısım en fazla 4 rakam.
+      - Eksik ise 0 ile doldur. (Örn: EK123 -> EK0123)
+    */
+    function formatFlightCode(input) {
+      let value = input.value.trim().toUpperCase();
+      // Harf ve rakam dışındakileri sil
+      value = value.replace(/[^A-Z0-9]/g, '');
+
+      if (value.length < 2) {
+        input.value = value;
+        return;
+      }
+      const letters = value.slice(0, 2);
+      let digits = value.slice(2).replace(/\D/g, '');
+      digits = digits.slice(0, 4);
+      digits = digits.padStart(4, '0');
+      input.value = letters + digits;
+    }
+
+    /*
+      (2) Yolcu & Bagaj sayısı -> Yolcu ad/soyad alanları & Araç önerisi
+    */
+    const passengerCountInput = document.getElementById("passengerCount");
+    const luggageCountInput   = document.getElementById("luggageCount");
+    const passengerContainer  = document.getElementById("passengerContainer");
+    const vehicleSuggestionEl = document.getElementById("vehicleSuggestion");
+
+    // Yolcu/Bagaj sayısı değiştiğinde
+    passengerCountInput.addEventListener("change", function(){
+      createPassengerFields();
+      updateVehicleSuggestion();
+      calculatePrice();
+    });
+    luggageCountInput.addEventListener("change", function(){
+      updateVehicleSuggestion();
+      calculatePrice();
+    });
+
+    function createPassengerFields() {
+      passengerContainer.innerHTML = "";
+      const count = parseInt(passengerCountInput.value) || 1;
+      for (let i = 1; i <= count; i++) {
+        const div = document.createElement("div");
+        div.className = "passenger-group";
+
+        const adInput = document.createElement("input");
+        adInput.type = "text";
+        adInput.placeholder = `Ad ${i}`;
+        adInput.id = `ad${i}`;
+
+        const soyadInput = document.createElement("input");
+        soyadInput.type = "text";
+        soyadInput.placeholder = `Soyad ${i}`;
+        soyadInput.id = `soyad${i}`;
+
+        div.appendChild(adInput);
+        div.appendChild(soyadInput);
+        passengerContainer.appendChild(div);
+      }
+    }
+
+    /* 
+      Araç önerisi:
+      - S CLASS kapasitesi: 2 kişi, 2 bagaj
+      - Vito kapasitesi: 6 kişi, 5 bagaj
+      Örnek Mantık:
+        * Eğer hepsi 1 araçta sığıyorsa => "1 x S CLASS" veya "1 x Vito"
+        * Aksi halde en az sayıda Vito kullan
+          neededVehicles = max( ceil( pax/6 ), ceil( bag/5 ) )
+    */
+    function updateVehicleSuggestion(){
+      const pax = parseInt(passengerCountInput.value) || 1;
+      const bag = parseInt(luggageCountInput.value)   || 0;
+      let suggestion = "";
+
+      // Önce S CLASS tek araçta yeter mi?
+      if (pax <= 2 && bag <= 2) {
+        suggestion = "Öneri: 1 x S CLASS veya 1 x Vito";
+      }
+      // Sonra Vito tek araçta yeter mi?
+      else if (pax <= 6 && bag <= 5) {
+        suggestion = "Öneri: 1 x Vito";
+      }
+      else {
+        // Birden fazla Vito gerekiyor
+        const neededVitos = Math.max(Math.ceil(pax / 6), Math.ceil(bag / 5));
+        suggestion = `Öneri: ${neededVitos} x Vito`;
+      }
+
+      vehicleSuggestionEl.textContent = suggestion;
+    }
+
+    /*
+      (3) GENEL HAVACILIK – Adres Gizleme & S Class Kaldırma
+         Yaka butonları + Fiyat Hesaplama
+    */
+    let selectedYakasi = null; // "Avrupa", "Anadolu", "Genel"
+
+    const btnAvrupa  = document.getElementById("btnAvrupa");
+    const btnAnadolu = document.getElementById("btnAnadolu");
+    const btnGenel   = document.getElementById("btnGenel");
+
+    const addressInput      = document.getElementById("address");
+    const addressLabel      = document.getElementById("addressLabel");
+    const vehicleTypeSelect = document.getElementById("vehicleType");
+    const priceDisplay      = document.getElementById("priceDisplay");
+
+    btnAvrupa.addEventListener("click", function() {
+      selectedYakasi = "Avrupa";
+      setSelectedButton(btnAvrupa);
+      checkYakasiChanges();
+      calculatePrice();
+    });
+    btnAnadolu.addEventListener("click", function() {
+      selectedYakasi = "Anadolu";
+      setSelectedButton(btnAnadolu);
+      checkYakasiChanges();
+      calculatePrice();
+    });
+    btnGenel.addEventListener("click", function() {
+      selectedYakasi = "Genel";
+      setSelectedButton(btnGenel);
+      checkYakasiChanges();
+      calculatePrice();
+    });
+
+    vehicleTypeSelect.addEventListener("change", function() {
+      calculatePrice();
+    });
+    document.getElementById("vehicleCount").addEventListener("change", function() {
+      calculatePrice();
+    });
+
+    function setSelectedButton(button) {
+      [btnAvrupa, btnAnadolu, btnGenel].forEach(btn => {
+        btn.classList.remove("selected");
+      });
+      button.classList.add("selected");
+    }
+
+    // "Genel Havacılık Terminali" -> Adres gizle, SCLASS gizle
+    function checkYakasiChanges() {
+      if (selectedYakasi === "Genel") {
+        addressInput.value = "";
+        addressInput.style.display = "none";
+        addressLabel.style.display = "none";
+
+        // Sadece Vito kalsın
+        vehicleTypeSelect.value = "vito";
+        for (let i = 0; i < vehicleTypeSelect.options.length; i++) {
+          if (vehicleTypeSelect.options[i].value === "sclass") {
+            vehicleTypeSelect.options[i].style.display = "none";
+          }
+        }
+      } else {
+        addressInput.style.display = "block";
+        addressLabel.style.display = "block";
+
+        // "Mercedes - S CLASS" seçeneğini geri getir
+        for (let i = 0; i < vehicleTypeSelect.options.length; i++) {
+          if (vehicleTypeSelect.options[i].value === "sclass") {
+            vehicleTypeSelect.options[i].style.display = "block";
+          }
+        }
+      }
+    }
+
+    /*
+      (4) Fiyat Hesaplama:
+        Vito: Avrupa=90 EUR, Anadolu=108 EUR, Genel=60 EUR
+        S CLASS: Avrupa=480, Anadolu=540 (Genel yok)
+    */
+    function calculatePrice() {
+      let pricePerVehicle = 0;
+      const vehicleType = vehicleTypeSelect.value;
+      const vehicleCount = parseInt(document.getElementById("vehicleCount").value) || 1;
+
+      if (vehicleType === "vito") {
+        if (selectedYakasi === "Avrupa")  pricePerVehicle = 90;
+        if (selectedYakasi === "Anadolu") pricePerVehicle = 108;
+        if (selectedYakasi === "Genel")   pricePerVehicle = 60;
+      } 
+      else if (vehicleType === "sclass") {
+        if (selectedYakasi === "Avrupa")  pricePerVehicle = 480;
+        if (selectedYakasi === "Anadolu") pricePerVehicle = 540;
+        // Genel için yok
+      }
+
+      const totalPrice = pricePerVehicle * vehicleCount;
+      priceDisplay.textContent = totalPrice.toString();
+    }
+
+    /*
+      ÖZET TABLOSUNU GÜNCELLE + PDF KAYDET
+    */
+    function updateSummary() {
+      // Fiyatı hesapla
+      calculatePrice();
+
+      // Özet alanını temizle
+      const summaryBody = document.getElementById("summaryBody");
+      summaryBody.innerHTML = "";
+
+      // Form bilgilerini topla
+      const pickupDateTime = document.getElementById("pickupDateTime").value;
+      const passengerCount = parseInt(document.getElementById("passengerCount").value) || 1;
+      const luggageCount   = parseInt(document.getElementById("luggageCount").value)   || 0;
+      const address        = document.getElementById("address").value;
+      const flightCode     = document.getElementById("flightCode").value;
+      const contactNumber  = document.getElementById("contactNumber").value;
+      const vehicleType    = vehicleTypeSelect.options[vehicleTypeSelect.selectedIndex]?.text || "";
+      const vehicleCount   = document.getElementById("vehicleCount").value;
+      const totalPrice     = priceDisplay.textContent;
+
+      // Yolcu Ad/Soyadları
+      let passengerNames = "";
+      for (let i = 1; i <= passengerCount; i++) {
+        const ad    = document.getElementById(`ad${i}`).value;
+        const soyad = document.getElementById(`soyad${i}`).value;
+        passengerNames += ad + " " + soyad;
+        if (i < passengerCount) passengerNames += "; ";
+      }
+
+      // Yaka bilgisi
+      let yakaText = "Seçilmedi";
+      if (selectedYakasi === "Avrupa")  yakaText = "Avrupa Yakası";
+      if (selectedYakasi === "Anadolu") yakaText = "Anadolu Yakası";
+      if (selectedYakasi === "Genel")   yakaText = "Genel Havacılık Terminali";
+
+      // Yardımcı fonksiyon: tabloya satır ekle
+      function addRow(field, value) {
+        const tr = document.createElement("tr");
+        const tdField = document.createElement("td");
+        const tdValue = document.createElement("td");
+        tdField.textContent = field;
+        tdValue.textContent = value;
+        tr.appendChild(tdField);
+        tr.appendChild(tdValue);
+        summaryBody.appendChild(tr);
+      }
+
+      addRow("Alınma Tarihi ve Saati", pickupDateTime || "-");
+      addRow("Yolcu Sayısı", passengerCount.toString());
+      addRow("Bagaj Sayısı", luggageCount.toString());
+      addRow("Yolcu Ad/Soyadları", passengerNames || "-");
+      addRow("Yaka (Seçim)", yakaText);
+      addRow("Adres", address || "-");
+      addRow("Uçuş Kodu", flightCode || "-");
+      addRow("Kontak Numarası", contactNumber || "-");
+      addRow("Araç Tipi", vehicleType);
+      addRow("Araç Adedi", vehicleCount);
+      addRow("Toplam Fiyat (EUR)", totalPrice);
+    }
+
+    function savePDF() {
+      updateSummary();
+      window.print();
+    }
+
+    // Sayfa açılınca varsayılan değerleri kur
+    window.addEventListener("load", function(){
+      createPassengerFields();  
+      updateVehicleSuggestion();
+      selectedYakasi = null;
+      calculatePrice();
+    });
+  </script>
+</body>
+</html>
